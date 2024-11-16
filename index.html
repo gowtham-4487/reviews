@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      color: #444;
+    }
+
+    form {
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    form input, form textarea, form button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    form button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    form button:hover {
+      background-color: #0056b3;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 30px 0 10px;
+    }
+
+    #reviews {
+      width: 90%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #reviews h3 {
+      margin-top: 0;
+    }
+
+    #reviews p {
+      margin: 5px 0;
+    }
+
+    #reviews div {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #f9f9f9;
+    }
+
+    #reviews div:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 600px) {
+      form, #reviews {
+        width: 95%;
+        margin: 10px auto;
+      }
+
+      form input, form textarea, form button {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Product Review System</h1>
+  <form id="reviewForm">
+    <input type="text" id="productName" placeholder="Product Name" required />
+    <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5" required />
+    <textarea id="comment" placeholder="Comment" rows="4" required></textarea>
+    <button type="submit">Submit Review</button>
+  </form>
+
+  <h2>Reviews</h2>
+  <div id="reviews"></div>
+
+  <script>
+    const form = document.getElementById('reviewForm');
+    const reviewsDiv = document.getElementById('reviews');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const productName = document.getElementById('productName').value;
+      const rating = document.getElementById('rating').value;
+      const comment = document.getElementById('comment').value;
+
+      await fetch('/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productName, rating, comment }),
+      });
+
+      loadReviews(productName);
+    });
+
+    async function loadReviews(productName) {
+      const response = await fetch(`/reviews/${productName}`);
+      const data = await response.json();
+      reviewsDiv.innerHTML = `
+        <h3>Product: ${productName}</h3>
+        <p>Average Rating: ${data.averageRating.toFixed(2)}</p>
+        ${data.reviews.map(
+          (review) => `
+            <div>
+              <p>Rating: ${review.rating}</p>
+              <p>Comment: ${review.comment}</p>
+            </div>
+          `
+        ).join('')}
+      `;
+    }
+  </script>
+</body>
+</html>
